@@ -174,9 +174,9 @@ TEST_F(ValueTest, String) {
 
   auto str = String::newString(string);
   EXPECT_STREQ(string, str.toString().c_str());
-#ifdef __cpp_char8_t
-  EXPECT_EQ(u8"hello world", str.toU8string());
-#endif
+//#ifdef __cpp_char8_t
+//  EXPECT_EQ(u8"hello world", str.toU8string());
+//#endif
   EXPECT_STREQ(string, str.describeUtf8().c_str());
   EXPECT_EQ(strVal, str);
 
@@ -184,20 +184,20 @@ TEST_F(ValueTest, String) {
   EXPECT_STREQ(string, str.toString().c_str());
 }
 
-#ifdef __cpp_char8_t
-
-TEST_F(ValueTest, U8String) {
-  EngineScope engineScope(engine);
-  std::u8string string = u8"你好, 世界";
-
-  auto str = String::newString(string);
-  EXPECT_EQ(string, str.toU8string());
-
-  str = engine->eval(TS().js(u8"'你好, 世界'").lua(u8"return '你好, 世界'").select()).asString();
-  EXPECT_EQ(string, str.toU8string());
-}
-
-#endif
+//#ifdef __cpp_char8_t
+//
+//TEST_F(ValueTest, U8String) {
+//  EngineScope engineScope(engine);
+//  std::u8string string = u8"你好, 世界";
+//
+//  auto str = String::newString(string);
+//  EXPECT_EQ(string, str.toU8string());
+//
+//  str = engine->eval(TS().js(u8"'你好, 世界'").lua(u8"return '你好, 世界'").select()).asString();
+//  EXPECT_EQ(string, str.toU8string());
+//}
+//
+//#endif
 
 TEST_F(ValueTest, InstanceOf) {
   EngineScope engineScope(engine);

@@ -100,6 +100,8 @@ void initExternalData(int argc, char** argv) {
 }
 
 GTEST_API_ int main(int argc, char** argv) {
+  testing::AddGlobalTestEnvironment({});
+  ::testing::InitGoogleTest(&argc, argv);
   printf("Running main() from %s\n", __FILE__);
   initExternalData(argc, argv);
   script::Logger::setDelegate(&logger);

@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
-
+set(CMAKE_TOOLCHAIN_FILE "D:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake"
+  CACHE STRING "Vcpkg toolchain file")
 file(STRINGS ${CMAKE_CURRENT_LIST_DIR}/VERSION SCRIPTX_VERSION)
 
 if ("${PROJECT_NAME}" STREQUAL "")
@@ -9,7 +10,6 @@ endif ()
 if ("${CMAKE_CXX_STANDARD}" STREQUAL "")
     message(WARNING "CMAKE_CXX_STANDARD not set, please set to 17 or latter")
 endif ()
-
 set(SCRIPTX_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 # supported targets
@@ -72,7 +72,7 @@ add_library(ScriptX STATIC
 target_include_directories(ScriptX PUBLIC ${SCRIPTX_DIR}/src/include)
 
 ###### config implementation ######
-
+set(SCRIPTX_BACKEND Python)
 if ("${SCRIPTX_BACKEND}" STREQUAL "")
     message(FATAL_ERROR "Platform not set. Please set SCRIPTX_BACKEND. Candidates: ${SCRIPTX_BACKEND_LIST}")
 endif ()

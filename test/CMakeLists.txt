@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 3.0)
-
+set(CMAKE_TOOLCHAIN_FILE "D:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake"
+  CACHE STRING "Vcpkg toolchain file")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 file(STRINGS ${CMAKE_CURRENT_LIST_DIR}/../VERSION SCRIPTX_VERSION)
 project(ScriptXUnitTests VERSION ${SCRIPTX_VERSION} LANGUAGES CXX C)
 
 option(DEVOPS_ENABLE_COVERAGE "enable code coverage" OFF)
 enable_testing()
-
+find_package(GTest CONFIG REQUIRED)
 add_executable(UnitTests)
-include(cmake/TestEnv.cmake)
+# include(cmake/TestEnv.cmake)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if (TEST_FLAG_ENABLE_ASAN)
@@ -52,7 +52,7 @@ set(SCRIPTX_DIR ${CMAKE_CURRENT_LIST_DIR}/..)
 ########### unit test config ###########
 
 # import googletest
-include(cmake/gtest/CMakeLists.txt)
+# include(cmake/gtest/CMakeLists.txt)
 
 target_sources(UnitTests PRIVATE
         src/gtest_main.cc
@@ -97,13 +97,19 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND TEST_FLAG_ENABLE_CLANG_TIDY)
 endif ()
 
 include_directories(${DEVOPS_LIBS_INCLUDE})
+include_directories("D:/dev/Python/Python310/include")
 target_link_libraries(ScriptX ${DEVOPS_LIBS_LIBPATH})
+# target_link_libraries(ScriptX PRIVATE GTest::gmock GTest::gtest GTest::gmock_main GTest::gtest_main)
 target_compile_definitions(ScriptX PUBLIC ${DEVOPS_LIBS_MARCO})
 
 # if you want to close rtti feature for ScriptX and your project
 #target_compile_options(ScriptX PRIVATE -fno-rtti)
 #target_compile_options(UnitTests PRIVATE -fno-rtti)
-target_link_libraries(UnitTests gtest ScriptX)
+link_directories("D:/dev/Python/Python310/libs")
+set_target_properties(UnitTests PROPERTIES LINK_FLAGS "/LIBPATH:D:/dev/Python/Python310/libs ")
+target_link_libraries(UnitTests PRIVATE GTest::gmock GTest::gtest GTest::gmock_main GTest::gtest_main ScriptX)
+target_link_libraries(UnitTests PRIVATE python310 python310_d)
+
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # using clang or gcc
@@ -146,10 +152,7 @@ if (${SCRIPTX_BACKEND} STREQUAL ${SCRIPTX_BACKEND_WEBASSEMBLY})
             "-sEXTRA_EXPORTED_RUNTIME_METHODS=['callMain']")
 endif ()
 
-add_test(
-        NAME ScriptXUnitTest
-        COMMAND UnitTests
-)
+add_test(ScriptXUnitTest UnitTests)
 
 # add_executable(InspectorTest src/InspectorTest.cc)
 # target_link_libraries(InspectorTest gtest ScriptX)
