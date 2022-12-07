@@ -6,8 +6,6 @@
 ---
 [![README-English](https://img.shields.io/badge/README-english-lightgreen)](README.md) [![License](https://img.shields.io/badge/license-Apache--2.0-green)](https://www.apache.org/licenses/LICENSE-2.0) [![UnitTests](https://github.com/Tencent/ScriptX/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/Tencent/ScriptX/actions/workflows/unit_tests.yml)  ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/tencent/ScriptX) ![Lines of code](https://img.shields.io/tokei/lines/github/tencent/ScriptX) ![GitHub top language](https://img.shields.io/github/languages/top/tencent/ScriptX) [![Coverage Status](https://coveralls.io/repos/github/Tencent/ScriptX/badge.svg)](https://coveralls.io/github/Tencent/ScriptX)
 
-
-
 ![ScriptX架构](docs/media/banner.webp)
 
 ScriptX是一个脚本引擎抽象层。对下封装多种脚本引擎，对上暴露统一的API，使得上层调用者可以完全隔离底层的引擎实现(后端)。
@@ -29,7 +27,6 @@ ScriptX的术语中，"前端"指对外的C++ API，"后端"则指不同的底�
 | CPython | Python |  | todo |
 | YARV | Ruby |  | todo |
 | Mono | C# |  | todo |
-
 
 # 简介
 
@@ -86,6 +83,7 @@ try {
 # 特性介绍
 
 ## 1. 支持多种引擎，多脚本语言
+
 ScriptX设计之初就目标为支持多种脚本语言，并在JavaScript上实现了V8和JavaScriptCore的引擎封装。
 后续为了验证ScriptX的多语言设计，实现了完整的Lua绑定。
 目前针对WebAssembly的支持也已经完成。
@@ -93,6 +91,7 @@ ScriptX设计之初就目标为支持多种脚本语言，并在JavaScript上实
 ## 2. 现代的 C++ API
 
 API设计上符合现代 C++ 风格，如：
+
 1. 三种引用类型 Local/Global/Weak，使用copy, move语义实现自动的内存管理（自动引用计数）
 2. 使用 variadic template 支持非常方便的 Function::call 语法
 3. 使用 Template Meta-Programing 实现直接绑定C++函数
@@ -102,6 +101,7 @@ API设计上符合现代 C++ 风格，如：
 > 注：ScriptX要求C++17（或1z）以上的编译器支持，并需要打开异常特性，（可以关闭RTTI特性）。
 
 ## 3. 高性能
+
 高性能是ScriptX设计上的重要指标。在实现过程中也充分体现了 Zero-Overhead 的C++思想。并在增加功能特性的时候通过相关的性能测试。
 
 ![性能测试对比数据](docs/media/performance.webp)
@@ -136,6 +136,7 @@ V8和JSCore的全局引用都必须在engine destory之前全部释放掉，否�
 当app作为宿主使用脚本引擎时，通常都是需要注入大量native 绑定的 函数/类 来为脚本逻辑提供能力。ScriptX 设计的`ClassDeifine`相关绑定API简单易用，并且可以支持直接绑定C++函数，极大的提升工作效率。
 
 ## 7. 可以与原生引擎API互操作
+
 ScriptX再提供引擎封装的同时，也提供了一套工具方法实现原生类型和ScriptX类型的相互转换。
 
 详见 [InteroperateTest](test/src/InteroperateTest.cc) 及 [相关文档](docs/zh/Interop.md)
@@ -143,8 +144,9 @@ ScriptX再提供引擎封装的同时，也提供了一套工具方法实现原�
 # 代码质量
 
 代码质量高标准要求
+
 1. 上百个测试用例，**单测覆盖率达 90+%**
-2.  **圈复杂度仅有 1.18**。
+2. **圈复杂度仅有 1.18**。
 3. 借助clang-format保证代码格式统一。
 4. 使用clang-tidy发现潜在问题。
 5. 在clang和MSVC编译器上都打开了"warning as error"级别的错误信息。
@@ -186,6 +188,7 @@ root
 # 上手文档
 
 ScriptX 中的一些重要类：
+
 1. `ScriptEngine`
 2. `EngineScope`
 2. `Exception`

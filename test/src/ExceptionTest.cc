@@ -21,7 +21,7 @@ namespace script::test {
 
 DEFINE_ENGINE_TEST(ExceptionTest);
 
-TEST_F(ExceptionTest, Normal) {
+TEST_F(ExceptionTest, Normal)  {
   {
     // ok
     EngineScope engineScope(engine);

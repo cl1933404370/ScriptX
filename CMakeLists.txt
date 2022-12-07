@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.0)
 set(CMAKE_TOOLCHAIN_FILE "D:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake"
   CACHE STRING "Vcpkg toolchain file")
 file(STRINGS ${CMAKE_CURRENT_LIST_DIR}/VERSION SCRIPTX_VERSION)
-
 if ("${PROJECT_NAME}" STREQUAL "")
     project(ScriptX VERSION ${SCRIPTX_VERSION} LANGUAGES CXX C)
 endif ()

@@ -8,8 +8,9 @@ project(ScriptXUnitTests VERSION ${SCRIPTX_VERSION} LANGUAGES CXX C)
 
 option(DEVOPS_ENABLE_COVERAGE "enable code coverage" OFF)
 enable_testing()
-find_package(GTest CONFIG REQUIRED)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_executable(UnitTests)
+find_package(GTest CONFIG REQUIRED)
 # include(cmake/TestEnv.cmake)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -151,8 +152,6 @@ if (${SCRIPTX_BACKEND} STREQUAL ${SCRIPTX_BACKEND_WEBASSEMBLY})
             "-sEXPORTED_FUNCTIONS=['_main']"
             "-sEXTRA_EXPORTED_RUNTIME_METHODS=['callMain']")
 endif ()
-
-add_test(ScriptXUnitTest UnitTests)
-
+add_test(NAME mytest COMMAND ScriptXUnitTests)
 # add_executable(InspectorTest src/InspectorTest.cc)
 # target_link_libraries(InspectorTest gtest ScriptX)

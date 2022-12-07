@@ -99,12 +99,10 @@ void initExternalData(int argc, char** argv) {
 #endif
 }
 
-GTEST_API_ int main(int argc, char** argv) {
-  testing::AddGlobalTestEnvironment({});
-  ::testing::InitGoogleTest(&argc, argv);
+/*GTEST_API_*/ int main(int argc, char** argv) {
   printf("Running main() from %s\n", __FILE__);
   initExternalData(argc, argv);
   script::Logger::setDelegate(&logger);
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
-}
+}  
