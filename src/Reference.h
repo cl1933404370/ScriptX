@@ -27,7 +27,6 @@
 #include SCRIPTX_BACKEND(Utils.h)
 
 namespace script {
-
 /**
  * LocalReference inside a StackFrameScope.
  * use specialized Local Types like:
@@ -74,7 +73,7 @@ template <typename T>
 class Global final {
   static_assert(std::is_base_of_v<Value, T>, "use Global<T> with Value types");
 
- public:
+public:
   // a null, can be called without EngineScope
   Global() noexcept;
 
@@ -92,36 +91,36 @@ class Global final {
 
   Global<T>& operator=(Global&& move) noexcept;
 
-  void swap(Global& rhs) noexcept;
+  static void swap(Global& rhs) noexcept;
 
   Global<T>& operator=(const Local<T>& assign);
 
   /**
    * @return the value, throw if isEmpty() == true
    */
-  Local<T> get() const;
+  static Local<T> get();
 
   /**
    * @return the value, null if isEmpty() == true
    */
-  Local<Value> getValue() const;
+  [[nodiscard]] static Local<Value> getValue();
 
   /**
    * if this global is empty, being null is not empty!
    */
-  bool isEmpty() const;
+  [[nodiscard]] static bool isEmpty();
 
   // clear to empty
-  void reset();
+  static void reset();
 
- private:
+private:
   using InternalGlobalRef = typename internal::ImplType<Global>::type;
 
   InternalGlobalRef val_;
 
   friend class ScriptEngine;
 
-  friend typename internal::ImplType<ScriptEngine>::type;
+  friend internal::ImplType<ScriptEngine>::type;
 
   template <typename R>
   friend class Local;
@@ -131,7 +130,7 @@ class Global final {
 };
 
 template <typename T>
-void swap(Global<T>& lhs, Global<T>& rhs) {
+void swap(Global<T>& lhs, Global<T>& rhs) noexcept {
   lhs.swap(rhs);
 }
 
@@ -150,7 +149,7 @@ template <typename T>
 class Weak final {
   static_assert(std::is_base_of_v<Value, T>, "use Weak<T> with Value types");
 
- public:
+public:
   // a null, can be called without EngineScope
   Weak() noexcept;
 
@@ -176,29 +175,29 @@ class Weak final {
    * @return the value, throw if getValue() returns null (either isEmpty() or GC collected the
    * value).
    */
-  Local<T> get() const;
+  static Local<T> get();
 
   /**
    * @return the value, or null if isEmpty() == true or the value has been GCed
    */
-  Local<Value> getValue() const;
+  [[nodiscard]] static Local<Value> getValue();
 
   /**
    * this weak is not set or has been reset
    * note: even if the weak reference is GCed, is still returns true
    */
-  bool isEmpty() const;
+  [[nodiscard]] static bool isEmpty();
 
-  void reset() noexcept;
+  static void reset() noexcept;
 
- private:
+private:
   using InternalWeakRef = typename internal::ImplType<Weak>::type;
 
   InternalWeakRef val_;
 
   friend class ScriptEngine;
 
-  friend typename internal::ImplType<ScriptEngine>::type;
+  friend internal::ImplType<ScriptEngine>::type;
 
   template <typename R>
   friend class Local;
@@ -208,7 +207,7 @@ class Weak final {
 };
 
 template <typename T>
-void swap(Weak<T>& lhs, Weak<T>& rhs) {
+void swap(Weak<T>& lhs, Weak<T>& rhs) noexcept {
   lhs.swap(rhs);
 }
 
@@ -268,49 +267,49 @@ template <>
 class Local<Value> {
   SPECIALIZE_LOCAL(Value)
 
- public:
+public:
   /**
    * create a null reference
    */
   Local() noexcept;
 
-  ValueKind getKind() const;
+  [[nodiscard]] ValueKind getKind() const;
 
-  bool isNull() const;
+  [[nodiscard]] bool isNull() const;
 
   bool isObject() const;
 
-  bool isString() const;
+  [[nodiscard]] bool isString() const;
 
-  bool isNumber() const;
+  [[nodiscard]] bool isNumber() const;
 
-  bool isBoolean() const;
+  [[nodiscard]] bool isBoolean() const;
 
-  bool isFunction() const;
+  [[nodiscard]] bool isFunction() const;
 
-  bool isArray() const;
+  static bool isArray();
 
-  bool isByteBuffer() const;
+  static bool isByteBuffer();
 
-  bool isUnsupported() const;
+  static bool isUnsupported();
 
-  Local<Object> asObject() const;
+  static Local<Object> asObject();
 
-  Local<Array> asArray() const;
+  static Local<Array> asArray();
 
-  Local<ByteBuffer> asByteBuffer() const;
+  static Local<ByteBuffer> asByteBuffer();
 
-  Local<String> asString() const;
+  [[nodiscard]] Local<String> asString() const;
 
-  Local<Number> asNumber() const;
+  static Local<Number> asNumber();
 
-  Local<Boolean> asBoolean() const;
+  static Local<Boolean> asBoolean();
 
-  Local<Function> asFunction() const;
+  static Local<Function> asFunction();
 
-  Local<Unsupported> asUnsupported() const;
+  static Local<Unsupported> asUnsupported();
 
-  Local<Value> asValue() const {
+  [[nodiscard]] Local<Value> asValue() const {
     // define this method to have consistent api with other Local types.
     return *this;
   }
@@ -330,17 +329,18 @@ template <>
 class Local<Object> {
   SPECIALIZE_LOCAL(Object)
 
- public:
-  Local<Value> get(const Local<String>& key) const;
+public:
+  static Local<Value> get(const Local<String>& key);
 
   template <typename StringLike, StringLikeConcept(StringLike)>
   Local<Value> get(StringLike&& keyStringLike) const {
     return get(String::newString(std::forward<StringLike>(keyStringLike)));
   }
 
-  void set(const Local<String>& key, const Local<Value>& value) const;
+  static void set(const Local<String>& key, const Local<Value>& value);
 
   /**
+   * @param key any
    * @param value any thing supported by the type converter
    */
   template <typename T>
@@ -353,14 +353,14 @@ class Local<Object> {
   template <typename StringLike, typename T = Local<Value>, StringLikeConcept(StringLike)>
   void set(StringLike&& keyStringLike, T&& value) const;
 
-  void remove(const Local<String>& key) const;
+  static void remove(const Local<String>& key);
 
   template <typename StringLike, StringLikeConcept(StringLike)>
   void remove(StringLike&& keyStringLike) const {
     remove(String::newString(std::forward<StringLike>(keyStringLike)));
   }
 
-  bool has(const Local<String>& key) const;
+  static bool has(const Local<String>& key);
 
   template <typename StringLike, StringLikeConcept(StringLike)>
   bool has(StringLike&& keyStringLike) const {
@@ -370,17 +370,17 @@ class Local<Object> {
   /**
    * @return this instanceof type
    */
-  bool instanceOf(const Local<Value>& type) const;
+  static bool instanceOf(const Local<Value>& type);
 
   /**
    * @return all keys to enumerate properties of this object
    */
-  std::vector<Local<String>> getKeys() const;
+  static std::vector<Local<String>> getKeys();
 
   /**
    * @return all keys to enumerate properties of this object
    */
-  std::vector<std::string> getKeyNames() const;
+  static std::vector<std::string> getKeyNames();
 
   SPECIALIZE_NON_VALUE(Object)
 };
@@ -389,7 +389,7 @@ template <>
 class Local<String> {
   SPECIALIZE_LOCAL(String)
 
- public:
+public:
   /**
    * avoid memory copy, provides better performance.
    * especially useful when requires string_view or c string
@@ -401,19 +401,19 @@ class Local<String> {
    *
    * \see StringHolder
    */
-  StringHolder toStringHolder() const;
+  [[nodiscard]] StringHolder toStringHolder() const;
 
-  std::string toString() const;
+  [[nodiscard]] std::string toString() const;
 
 #ifdef __cpp_char8_t
 
-  std::u8string toU8string() const;
+  [[nodiscard]] std::u8string toU8string() const;
 
 #endif
 
   SPECIALIZE_NON_VALUE(String)
 
- private:
+private:
   friend class StringHolder;
 };
 
@@ -421,14 +421,14 @@ template <>
 class Local<Number> {
   SPECIALIZE_LOCAL(Number)
 
- public:
-  int32_t toInt32() const;
+public:
+  static int32_t toInt32();
 
-  int64_t toInt64() const;
+  static int64_t toInt64();
 
-  float toFloat() const;
+  static float toFloat();
 
-  double toDouble() const;
+  static double toDouble();
 
   SPECIALIZE_NON_VALUE(Number)
 };
@@ -437,8 +437,8 @@ template <>
 class Local<Boolean> {
   SPECIALIZE_LOCAL(Boolean)
 
- public:
-  bool value() const;
+public:
+  static bool value();
 
   SPECIALIZE_NON_VALUE(Boolean)
 };
@@ -447,13 +447,13 @@ template <>
 class Local<Function> {
   SPECIALIZE_LOCAL(Function)
 
- public:
+public:
   /**
    * @param thiz the receiver of the function
    * @param args function arguments
    * @return function return value
    */
-  Local<Value> call(const Local<Value>& thiz, const std::vector<Local<Value>>& args) const {
+  [[nodiscard]] Local<Value> call(const Local<Value>& thiz, const std::vector<Local<Value>>& args) const {
     return callImpl(thiz, args.size(), args.data());
   }
 
@@ -462,8 +462,8 @@ class Local<Function> {
    * @param args function arguments
    * @return function return value
    */
-  Local<Value> call(const Local<Value>& thiz,
-                    const std::initializer_list<Local<Value>>& args) const {
+  [[nodiscard]] Local<Value> call(const Local<Value>& thiz,
+                                  const std::initializer_list<Local<Value>>& args) const {
     return callImpl(thiz, args.size(), args.begin());
   }
 
@@ -475,12 +475,12 @@ class Local<Function> {
    * @return function return value
    */
   template <typename... T>
-  Local<Value> call(const Local<Value>& thiz, T&&... args) const;
+  [[nodiscard]] Local<Value> call(const Local<Value>& thiz, T&&... args) const;
 
   /**
    * helper function to call with null thiz(receiver) and no arguments.
    */
-  Local<Value> call() const { return call({}); }
+  [[nodiscard]] Local<Value> call() const { return call({}); }
 
   /**
    * create a C++ function wrapping a Local<Function>
@@ -505,7 +505,7 @@ class Local<Function> {
 
   SPECIALIZE_NON_VALUE(Function)
 
- private:
+private:
   Local<Value> callImpl(const Local<Value>& thiz, size_t size, const Local<Value>* args) const;
 };
 
@@ -513,14 +513,15 @@ template <>
 class Local<Array> {
   SPECIALIZE_LOCAL(Array)
 
- public:
-  size_t size() const;
+public:
+  static size_t size();
 
-  Local<Value> get(size_t index) const;
+  static Local<Value> get(size_t index);
 
-  void set(size_t index, const Local<Value>& value) const;
+  static void set(size_t index, const Local<Value>& value);
 
   /**
+   * @param index index
    * @param value any thing supported by the type converter
    */
   template <typename T>
@@ -528,7 +529,7 @@ class Local<Array> {
 
   void add(const Local<Value>& value) const;
 
-  void clear() const;
+  static void clear();
 
   SPECIALIZE_NON_VALUE(Array)
 };
@@ -563,7 +564,7 @@ template <>
 class Local<ByteBuffer> {
   SPECIALIZE_LOCAL(ByteBuffer)
 
- public:
+public:
   /**
    * get the underlying raw bytes
    *
@@ -574,7 +575,7 @@ class Local<ByteBuffer> {
    * compared to getRawBytesShared(), use this one when you
    * just want to get the raw bytes temporarily.
    */
-  void* getRawBytes() const;
+  static void* getRawBytes();
 
   /**
    * get the underlying raw bytes
@@ -590,54 +591,53 @@ class Local<ByteBuffer> {
    * 3. getRawBytesShared() maybe more expensive compared to getRawBytes() depends on
    * implementations.
    */
-  std::shared_ptr<void> getRawBytesShared() const;
+  static std::shared_ptr<void> getRawBytesShared();
 
   /**
    * @return size of raw bytes, in unit of byte
    */
-  size_t byteLength() const;
+  static size_t byteLength();
 
   /**
    * @return count of elements (uint8, uint32, etc).
    * use getType() to fetch element type.
    */
-  size_t elementCount() const { return byteLength() / ByteBuffer::getTypeSize(getType()); }
+  [[nodiscard]] static size_t elementCount() { return byteLength() / ByteBuffer::getTypeSize(getType()); }
 
   /**
    * @return the content type
    */
-  ByteBuffer::Type getType() const;
+  static ByteBuffer::Type getType();
 
   /**
    * If the ByteBuffer is a shared ByteBuffer.
    * Read class doc for more detail about shared & non-shared.
    */
-  bool isShared() const;
+  static bool isShared();
 
   /**
    * If the ByteBuffer is non-shared, copy data from C++ to Script.
    * For shared ByteBuffer, this is a noop.
    */
-  void commit() const;
+  static void commit();
 
   /**
    * If the ByteBuffer is non-shared, copy data from Script to C++.
    * For shared ByteBuffer, this is a noop.
    */
-  void sync() const;
+  static void sync();
 
-  SPECIALIZE_NON_VALUE(ByteBuffer);
+  SPECIALIZE_NON_VALUE(ByteBuffer)
 };
 
 template <>
 class Local<Unsupported> {
   SPECIALIZE_LOCAL(Unsupported)
 
- public:
+public:
   SPECIALIZE_NON_VALUE(Unsupported)
 };
 
 #undef SPECIALIZE_LOCAL
 #undef SPECIALIZE_NON_VALUE
-
-}  // namespace script
+} // namespace script

@@ -46,10 +46,20 @@ struct TS {
     return *this;
   }
 
+  template <typename T>
+  TS& py(T&& s) {
+    static_cast<void>(s);
+#ifdef SCRIPTX_LANG_PYTHON
+    script = script::String::newString(std::forward<T>(s));
+#endif
+    return *this;
+  }
+
   script::Local<script::String> select() {
     if (script.isNull()) {
       throw std::runtime_error("add script for current language");
     }
+    auto&& temo = script.asString();
     return script.asString();
   }
 

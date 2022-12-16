@@ -18,18 +18,25 @@
 #pragma once
 #include "../../src/types.h"
 
-namespace script {
+namespace script
+{
 
-struct py_interop;
+  struct py_interop;
 
-template <>
-struct internal::ImplType<StringHolder> {
-  using type = int;
-};
+  template <>
+  struct internal::ImplType<StringHolder>
+  {
+    struct type
+    {
+      const char *string = nullptr;
+      size_t len = 0;
+    };
+  };
 
-template <>
-struct internal::ImplType<internal::interop> {
-  using type = py_interop;
-};
+  template <>
+  struct internal::ImplType<internal::interop>
+  {
+    using type = py_interop;
+  };
 
-}  // namespace script
+} // namespace script

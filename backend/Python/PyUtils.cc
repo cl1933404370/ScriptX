@@ -19,25 +19,32 @@
 
 namespace script {
 
-StringHolder::StringHolder(const script::Local<script::String> &string) {}
+StringHolder::StringHolder(const Local<String>&string) {
+  internalHolder_.string =
+      PyBytes_AsString(string.val_);
+}
 
 StringHolder::~StringHolder() = default;
 
-size_t StringHolder::length() const { return 0; }
+size_t StringHolder::length() const { return internalHolder_.len; }
 
-const char *StringHolder::c_str() const { return ""; }
+const char *StringHolder::c_str() const { return internalHolder_.string; }
 
-std::string_view StringHolder::stringView() const { return {}; }
+std::string_view StringHolder::stringView() const { return internalHolder_.string; }
 
-std::string StringHolder::string() const { return {}; }
+std::string StringHolder::string() const { return internalHolder_.string; }
 
 #if defined(__cpp_char8_t)
 // NOLINTNEXTLINE(clang-analyzer-cplusplus.InnerPointer)
-std::u8string StringHolder::u8string() const { return std::u8string(c_u8str(), length()); }
+std::u8string StringHolder::u8string() const {
+  const std::u8string str = {c_u8str(), length()};
+  return str;
+}
 
 std::u8string_view StringHolder::u8stringView() const {
   // NOLINTNEXTLINE(clang-analyzer-cplusplus.InnerPointer)
-  return std::u8string_view(c_u8str(), length());
+  const std::u8string_view temp  = {c_u8str(), length()};
+  return temp;
 }
 
 const char8_t *StringHolder::c_u8str() const { return reinterpret_cast<const char8_t *>(c_str()); }

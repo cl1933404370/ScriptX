@@ -118,13 +118,14 @@ TEST_F(EngineScopeTest, StackFrameScope) {
   Local<Value> val;
   {
     StackFrameScope stack;
-    auto s = String::newString("InsideStack");
+    const auto s = String::newString("InsideStack111");
     val = stack.returnValue(s);
   }
-
+  auto ss = val.asString();
   ASSERT_TRUE(val.isString());
-
-  EXPECT_STREQ(val.asString().toString().c_str(), "InsideStack");
+  std::string a = val.asString().toString();
+  const char* b = a.c_str();
+  EXPECT_STREQ(val.asString().toString().c_str(), "InsideStack111");
 }
 
 TEST_F(EngineScopeTest, TwoThreads) {

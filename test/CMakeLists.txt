@@ -98,7 +98,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND TEST_FLAG_ENABLE_CLANG_TIDY)
 endif ()
 
 include_directories(${DEVOPS_LIBS_INCLUDE})
-include_directories("D:/dev/Python/Python310/include")
+include_directories("D:/dev/Python/Python311/include")
 target_link_libraries(ScriptX ${DEVOPS_LIBS_LIBPATH})
 # target_link_libraries(ScriptX PRIVATE GTest::gmock GTest::gtest GTest::gmock_main GTest::gtest_main)
 target_compile_definitions(ScriptX PUBLIC ${DEVOPS_LIBS_MARCO})
@@ -106,10 +106,10 @@ target_compile_definitions(ScriptX PUBLIC ${DEVOPS_LIBS_MARCO})
 # if you want to close rtti feature for ScriptX and your project
 #target_compile_options(ScriptX PRIVATE -fno-rtti)
 #target_compile_options(UnitTests PRIVATE -fno-rtti)
-link_directories("D:/dev/Python/Python310/libs")
-set_target_properties(UnitTests PROPERTIES LINK_FLAGS "/LIBPATH:D:/dev/Python/Python310/libs ")
+link_directories("D:/dev/Python/Python311/libs")
+set_target_properties(UnitTests PROPERTIES LINK_FLAGS "/LIBPATH:D:/dev/Python/Python311/libs ")
 target_link_libraries(UnitTests PRIVATE GTest::gmock GTest::gtest GTest::gmock_main GTest::gtest_main ScriptX)
-target_link_libraries(UnitTests PRIVATE python310 python310_d)
+target_link_libraries(UnitTests PRIVATE Python311 Python311_d)
 
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

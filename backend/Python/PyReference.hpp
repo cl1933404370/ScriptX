@@ -68,17 +68,17 @@ Global<T>& Global<T>::operator=(const script::Local<T>& assign) {
 }
 
 template <typename T>
-Local<T> Global<T>::get() const {
+Local<T> Global<T>::get() {
   TEMPLATE_NOT_IMPLEMENTED();
 }
 
 template <typename T>
-Local<Value> Global<T>::getValue() const {
+Local<Value> Global<T>::getValue() {
   TEMPLATE_NOT_IMPLEMENTED();
 }
 
 template <typename T>
-bool Global<T>::isEmpty() const {
+bool Global<T>::isEmpty() {
   return false;
 }
 
@@ -129,18 +129,18 @@ Weak<T>& Weak<T>::operator=(const script::Local<T>& assign) {
 }
 
 template <typename T>
-Local<T> Weak<T>::get() const {
+Local<T> Weak<T>::get() {
   if (isEmpty()) throw Exception("get on empty Weak");
   TEMPLATE_NOT_IMPLEMENTED();
 }
 
 template <typename T>
-Local<Value> Weak<T>::getValue() const {
+Local<Value> Weak<T>::getValue() {
   TEMPLATE_NOT_IMPLEMENTED();
 }
 
 template <typename T>
-bool Weak<T>::isEmpty() const {
+bool Weak<T>::isEmpty() {
   return false;
 }
 

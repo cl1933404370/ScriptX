@@ -45,26 +45,28 @@ return f;
 
 )";
 
+constexpr auto kPyClassScript =
+    u8R"(
+
+class Stock:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+    def greep(self):
+        return "Hello, I'm " + str(self.name) + " " + str(self.age) + " years old."
+
+def f(name, age):
+    return Stock(name, age)
+return f
+
+)";
+
+
+
 TEST_F(ValueTest, Object_NewObject) {
   EngineScope engineScope(engine);
-  Local<Value> func = engine->eval(TS().js(u8R"(
-function f(name, age) {
-    this.name = name;
-    this.age = age;
-}
-
-f.prototype.greet = function() {
-    let str = "Hello, I'm " + this.name + " " + this.age + " years old.";
-    // console.log(str);
-    return str;
-}
-
-f;
-
-)")
-                                       .lua(kLuaClassScript)
-                                       .select());
-
+  Local<Value> func = engine->eval(kPyClassScript);
   ASSERT_TRUE(func.isObject());
 
   std::initializer_list<Local<Object>> jennyList{
@@ -444,7 +446,7 @@ TEST_F(ValueTest, EngineEvalReturnValue) {
 
 TEST_F(ValueTest, Binding) {
   EngineScope engineScope(engine);
-  auto func = Function::newFunction([](int, int) { return 0; });
+  const auto func = Function::newFunction([](int, int) { return 0; });
 
   EXPECT_TRUE(func.asValue().isFunction());
 
