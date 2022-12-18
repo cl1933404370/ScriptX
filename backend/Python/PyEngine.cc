@@ -43,7 +43,18 @@ Local<Value> PyEngine::eval(const Local<String>& script, const Local<String>& so
 
 Local<Value> PyEngine::eval(const Local<String>& script, const Local<Value>& sourceFile) {
   //todo
-  return Local<Value>();
+  Tracer trace(this, "PyEngine::eval");
+  const auto sourceStringHolder = script.toString();
+  std::string sourceFileName;
+  if (sourceFile.isString()) {
+    sourceFileName = sourceFile.asString().toString();
+  }
+  if (sourceFileName.empty()) {
+    sourceFileName = "unknown.py";
+  }
+  const char* s = const_cast<char*>(sourceStringHolder.c_str());
+  PyObject* result = PyRun_String(s, Py_eval_input,{},{});
+  return  Local<Value>(result);
 }
 
 std::shared_ptr<utils::MessageQueue> PyEngine::messageQueue() { return queue_; }
