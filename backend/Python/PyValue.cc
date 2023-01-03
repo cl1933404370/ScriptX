@@ -25,7 +25,6 @@ using script::py_interop;
 using script::py_backend::checkException;
 
 namespace script {
-
 template <typename T>
 Local<T> checkAndMakeLocal(PyObject* ref) {
   return py_interop::makeLocal<T>(checkException(ref));
@@ -34,9 +33,68 @@ Local<T> checkAndMakeLocal(PyObject* ref) {
 // for python this creates an empty dict
 Local<Object> Object::newObject() { return checkAndMakeLocal<Object>(PyDict_New()); }
 
-Local<Object> Object::newObjectImpl(const Local<Value>& type, size_t size,
+Local<Object> Object::newObjectImpl(const Local<Value>& type, const size_t size,
                                     const Local<Value>* args) {
-  TEMPLATE_NOT_IMPLEMENTED();
+  // TEMPLATE_NOT_IMPLEMENTED()
+  PyObject* pValue = nullptr;
+  PyObject* pArgs = PyTuple_New(static_cast<Py_ssize_t>(size));
+  for (size_t i = 0; i < size; ++i) {
+    switch (Local<Value> value = *args; value.getKind()) {
+      case ValueKind::kString: {
+        const char* temp = value.asString().toString().c_str();
+        pValue = PyBytes_FromString(temp);
+        if (!PyBytes_Check(pValue)) {
+          assert(0);
+        }
+      }
+      break;
+      case ValueKind::kNumber: {
+        const long aa = static_cast<long>(value.asNumber().toInt64());
+        pValue = PyLong_FromLong(aa);
+        if (!PyNumber_Check(pValue)) {
+          assert(0);
+        }
+      }
+      break;
+      case ValueKind::kNull:
+        break;
+      case ValueKind::kObject:
+        break;
+      case ValueKind::kBoolean:
+        break;
+      case ValueKind::kFunction:
+        break;
+      case ValueKind::kArray:
+        break;
+      case ValueKind::kByteBuffer:
+        break;
+      case ValueKind::kUnsupported:
+        break;
+      default:
+        break;
+    }
+    if (!pValue) {
+      Py_DECREF(pArgs);
+      [[maybe_unused]] int a = fprintf(stderr, "Cannot convert argument\n");
+      return Local<Object>{nullptr};
+    }
+    PyTuple_SetItem(pArgs, static_cast<Py_ssize_t>(i), pValue);
+    Py_DECREF(pValue);
+    pValue = nullptr;
+    ++args;
+  }
+  PyObject* classValue = PyObject_CallObject(type.asObject().val_, pArgs);
+  Py_DECREF(pArgs);
+  Py_DECREF(type.asObject().val_);
+  pArgs = nullptr;
+  if (classValue != nullptr) {
+    // Py_DECREF(pValue);
+  } else {
+    PyErr_Print();
+    [[maybe_unused]] int a = fprintf(stderr, "Call failed\n");
+    return Local<Object>{nullptr};
+  }
+  return Local<Object>{classValue};
 }
 
 Local<String> String::newString(const char* utf8) {
@@ -74,11 +132,11 @@ Local<Number> Number::newNumber(double value) {
 }
 
 Local<Number> Number::newNumber(int32_t value) {
-  return checkAndMakeLocal<Number>(PyLong_FromLong(static_cast<long>(value)));
+  return checkAndMakeLocal<Number>(PyLong_FromLong(value));
 }
 
 Local<Number> Number::newNumber(int64_t value) {
-  return checkAndMakeLocal<Number>(PyLong_FromLongLong(static_cast<long long>(value)));
+  return checkAndMakeLocal<Number>(PyLong_FromLongLong(value));
 }
 
 Local<Boolean> Boolean::newBoolean(bool value) {
@@ -86,33 +144,30 @@ Local<Boolean> Boolean::newBoolean(bool value) {
 }
 
 namespace {
-
-static constexpr const char* kFunctionDataName = "_ScriptX_function_data";
+constexpr const char* kFunctionDataName = "_ScriptX_function_data";
 
 struct FunctionData {
   FunctionCallback function;
   py_backend::PyEngine* engine = nullptr;
 };
+} // namespace
 
-}  // namespace
+Local<Function> Function::newFunction(FunctionCallback callback) {
+  auto callback_ins = std::make_unique<FunctionData>();
+  callback_ins->engine = EngineScope::currentEngineAs<py_backend::PyEngine>();
+  callback_ins->function = std::move(callback);
 
-Local<Function> Function::newFunction(script::FunctionCallback callback) {
-  auto callbackIns = std::make_unique<FunctionData>();
-  callbackIns->engine = EngineScope::currentEngineAs<py_backend::PyEngine>();
-  callbackIns->function = std::move(callback);
-
-  PyMethodDef method{};
+  PyMethodDef method;
   method.ml_name = "ScriptX_native_method";
   method.ml_flags = METH_O;
   method.ml_doc = "ScriptX Function::newFunction";
   method.ml_meth = [](PyObject* self, PyObject* args) -> PyObject* {
-    auto ptr = PyCapsule_GetPointer(self, kFunctionDataName);
-    if (ptr == nullptr) {
-      ::PyErr_SetString(PyExc_TypeError, "invalid 'self' for native method");
+    if (const auto ptr = PyCapsule_GetPointer(self, kFunctionDataName); ptr == nullptr) {
+      PyErr_SetString(PyExc_TypeError, "invalid 'self' for native method");
     } else {
-      auto data = static_cast<FunctionData*>(ptr);
+      const auto data = static_cast<FunctionData*>(ptr);
       try {
-        auto ret = data->function(py_interop::makeArguments(nullptr, self, args));
+        const auto ret = data->function(py_interop::makeArguments(nullptr, self, args));
         return py_interop::toPy(ret);
       } catch (Exception& e) {
         py_backend::rethrowException(e);
@@ -121,16 +176,16 @@ Local<Function> Function::newFunction(script::FunctionCallback callback) {
     return nullptr;
   };
 
-  auto ctx = PyCapsule_New(callbackIns.get(), kFunctionDataName, [](PyObject* cap) {
-    auto ptr = PyCapsule_GetPointer(cap, kFunctionDataName);
+  const auto ctx = PyCapsule_New(callback_ins.get(), kFunctionDataName, [](PyObject* cap) {
+    const auto ptr = PyCapsule_GetPointer(cap, kFunctionDataName);
     delete static_cast<FunctionData*>(ptr);
   });
-  py_backend::checkException(ctx);
-  callbackIns.release();
+  checkException(ctx);
+  callback_ins.reset();
 
   PyObject* closure = PyCFunction_New(&method, ctx);
   Py_XDECREF(ctx);
-  py_backend::checkException(closure);
+  checkException(closure);
 
   return Local<Function>(closure);
 }
@@ -140,17 +195,16 @@ Local<Array> Array::newArray(size_t size) {
 }
 
 Local<Array> Array::newArrayImpl(size_t size, const Local<Value>* args) {
-  TEMPLATE_NOT_IMPLEMENTED();
+  TEMPLATE_NOT_IMPLEMENTED()
 }
 
-Local<ByteBuffer> ByteBuffer::newByteBuffer(size_t size) { TEMPLATE_NOT_IMPLEMENTED(); }
+Local<ByteBuffer> ByteBuffer::newByteBuffer(size_t size) { TEMPLATE_NOT_IMPLEMENTED() }
 
-Local<script::ByteBuffer> ByteBuffer::newByteBuffer(void* nativeBuffer, size_t size) {
-  TEMPLATE_NOT_IMPLEMENTED();
+Local<ByteBuffer> ByteBuffer::newByteBuffer(void* nativeBuffer,
+                                            size_t size) { TEMPLATE_NOT_IMPLEMENTED() }
+
+Local<ByteBuffer> ByteBuffer::newByteBuffer(
+    [[maybe_unused]] const std::shared_ptr<void>& nativeBuffer, size_t size) {
+  TEMPLATE_NOT_IMPLEMENTED()
 }
-
-Local<ByteBuffer> ByteBuffer::newByteBuffer(std::shared_ptr<void> nativeBuffer, size_t size) {
-  TEMPLATE_NOT_IMPLEMENTED();
-}
-
-}  // namespace script
+} // namespace script

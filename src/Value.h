@@ -320,7 +320,7 @@ class ByteBuffer : public Value {
    * thus ret.getRawBytes() == nativeBuffer.get()
    *
    */
-  static Local<ByteBuffer> newByteBuffer(std::shared_ptr<void> nativeBuffer, size_t size);
+  static Local<ByteBuffer> newByteBuffer(const std::shared_ptr<void>& nativeBuffer, size_t size);
 };
 
 class Unsupported : public Value {};

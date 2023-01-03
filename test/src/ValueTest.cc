@@ -46,42 +46,42 @@ return f;
 )";
 
 constexpr auto kPyClassScript =
-    u8R"(
-
-class Stock:
-    def __init__(self, name, age):
-        self.name = name
-        self.age = age
-
-    def greep(self):
-        return "Hello, I'm " + str(self.name) + " " + str(self.age) + " years old."
-
+			u8R"(
 def f(name, age):
-    return Stock(name, age)
-return f
+    class Stock:
+        def __init__(self, name, age):
+            self.name = name
+            self.age = age
 
+        def greet(self):
+            #import pdb
+            #pdb.set_trace()
+            print("Hello, I'm " + str(self.name) +
+                  " " + str(self.age) + " years old.")
+            return "Hello, I'm " + str(self.name) + " " + str(self.age) + " years old"
+        pass
+    return Stock(name, age)
+f
 )";
 
 
 
 TEST_F(ValueTest, Object_NewObject) {
   EngineScope engineScope(engine);
-  Local<Value> func = engine->eval(kPyClassScript);
+  const Local<Value> func = engine->eval(kPyClassScript);
   ASSERT_TRUE(func.isObject());
 
-  std::initializer_list<Local<Object>> jennyList{
-      Object::newObject(func, {String::newString("Jenny"), Number::newNumber(5)}),
-      // variadic helper
-      Object::newObject(func, String::newString("Jenny"), Number::newNumber(5)),
-      // C++ types
-      Object::newObject(func, "Jenny", 5),
-      // mixed
-      Object::newObject(func, String::newString("Jenny"), 5)};
-
-  for (auto& jenny : jennyList) {
-    auto name = jenny.get(String::newString(u8"name"));
-    auto age = jenny.get(String::newString(u8"age"));
-    auto greet = jenny.get(String::newString(u8"greet"));
+  for (const std::initializer_list<Local<Object>> jenny_list{
+           Object::newObject(func, {String::newString("Jenny"), Number::newNumber(5)}),
+           // variadic helper
+           Object::newObject(func, String::newString("Jenny"), Number::newNumber(5)),
+           // C++ types
+           Object::newObject(func, "Jenny", 5),
+            //mixed
+           Object::newObject(func, String::newString("Jenny"), 5)}; auto& jenny : jenny_list) {
+    auto name = script::Local<script::Object>::get(String::newString(u8"name"));
+    auto age = script::Local<script::Object>::get(String::newString(u8"age"));
+    auto greet = script::Local<script::Object>::get(String::newString(u8"greet"));
 
     ASSERT_TRUE(name.isString()) << name.describeUtf8();
     ASSERT_TRUE(age.isNumber()) << age.describeUtf8();

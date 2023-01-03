@@ -277,7 +277,7 @@ public:
 
   [[nodiscard]] bool isNull() const;
 
-  bool isObject() const;
+  [[nodiscard]] bool isObject() const;
 
   [[nodiscard]] bool isString() const;
 
@@ -293,19 +293,19 @@ public:
 
   static bool isUnsupported();
 
-  static Local<Object> asObject();
+  [[nodiscard]] Local<Object> asObject() const;
 
-  static Local<Array> asArray();
+  Local<Array> asArray() const;
 
   static Local<ByteBuffer> asByteBuffer();
 
   [[nodiscard]] Local<String> asString() const;
 
-  static Local<Number> asNumber();
+  [[nodiscard]] Local<Number> asNumber() const;
 
   static Local<Boolean> asBoolean();
 
-  static Local<Function> asFunction();
+  Local<Function> asFunction() const;
 
   static Local<Unsupported> asUnsupported();
 
@@ -422,13 +422,13 @@ class Local<Number> {
   SPECIALIZE_LOCAL(Number)
 
 public:
-  static int32_t toInt32();
+  int32_t toInt32() const;
 
-  static int64_t toInt64();
+  int64_t toInt64() const;
 
-  static float toFloat();
+  float toFloat() const;
 
-  static double toDouble();
+  double toDouble() const;
 
   SPECIALIZE_NON_VALUE(Number)
 };
@@ -516,7 +516,7 @@ class Local<Array> {
 public:
   static size_t size();
 
-  static Local<Value> get(size_t index);
+  Local<Value> get(size_t index);
 
   static void set(size_t index, const Local<Value>& value);
 
