@@ -166,10 +166,8 @@ bool Local<Value>::isByteBuffer() { return false; }
 
 bool Local<Value>::isObject() const {
   //cpython object check
-  if (!val_) {
-    return false;
-  }
-  return PyDict_Check(val_);
+
+  return val_;
 }
 
 bool Local<Value>::isUnsupported() { return false; }
