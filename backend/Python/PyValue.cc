@@ -41,8 +41,9 @@ Local<Object> Object::newObjectImpl(const Local<Value>& type, const size_t size,
   for (size_t i = 0; i < size; ++i) {
     switch (Local<Value> value = *args; value.getKind()) {
       case ValueKind::kString: {
-        const char* temp = value.asString().toString().c_str();
-        pValue = PyBytes_FromString(temp);
+        auto ss = value.asString().toString();
+        auto tt1 = ss.c_str();
+        pValue = PyBytes_FromString(tt1);
         if (!PyBytes_Check(pValue)) {
           assert(0);
         }
@@ -79,14 +80,12 @@ Local<Object> Object::newObjectImpl(const Local<Value>& type, const size_t size,
       return Local<Object>{nullptr};
     }
     PyTuple_SetItem(pArgs, static_cast<Py_ssize_t>(i), pValue);
-    Py_DECREF(pValue);
-    pValue = nullptr;
     ++args;
   }
-  PyObject* classValue = PyObject_CallObject(type.asObject().val_, pArgs);
+  const auto copyFun = type.asObject().val_;
+  PyObject* classValue = PyObject_CallObject(copyFun, pArgs);
   Py_DECREF(pArgs);
-  Py_DECREF(type.asObject().val_);
-  pArgs = nullptr;
+  Py_IncRef(copyFun);
   if (classValue != nullptr) {
     // Py_DECREF(pValue);
   } else {

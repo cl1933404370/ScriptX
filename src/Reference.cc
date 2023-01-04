@@ -30,6 +30,7 @@ StringHolder Local<String>::toStringHolder() const { return StringHolder(*this);
 
 std::string Local<String>::toString() const {
   auto cc = toStringHolder();
+  auto dd = toStringHolder().string();
   return toStringHolder().string();
 }
 

@@ -330,14 +330,14 @@ class Local<Object> {
   SPECIALIZE_LOCAL(Object)
 
 public:
-  static Local<Value> get(const Local<String>& key);
+  [[nodiscard]] Local<Value> get(const Local<String>& key) const;
 
   template <typename StringLike, StringLikeConcept(StringLike)>
   Local<Value> get(StringLike&& keyStringLike) const {
     return get(String::newString(std::forward<StringLike>(keyStringLike)));
   }
 
-  static void set(const Local<String>& key, const Local<Value>& value);
+  void set(const Local<String>& key, const Local<Value>& value) const;
 
   /**
    * @param key any

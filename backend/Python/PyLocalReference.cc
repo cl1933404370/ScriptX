@@ -270,14 +270,17 @@ namespace script
 
   Local<String> Local<Value>::describe() const {TEMPLATE_NOT_IMPLEMENTED()}
 
-  Local<Value> Local<Object>::get(const Local<String> &key)
-  {
-    return {};
+  Local<Value> Local<Object>::get(const Local<String> &key) const {
+    const auto ss = key.toString();
+    const auto tt = ss.c_str();
+    PyObject* attr =  PyObject_GetAttrString(val_, tt);
+    return Local<Value>{attr};
   }
 
   void Local<Object>::set(const Local<String> &key,
-                          const Local<Value> &value)
-  {
+                          const Local<Value> &value) const {
+      //bug
+      PyObject_SetAttrString(val_, key.toString().c_str(),value.asObject().val_);
   }
 
   void Local<Object>::remove(const Local<class String> &key)

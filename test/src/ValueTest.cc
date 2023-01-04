@@ -54,8 +54,7 @@ def f(name, age):
             self.age = age
 
         def greet(self):
-            #import pdb
-            #pdb.set_trace()
+           
             print("Hello, I'm " + str(self.name) +
                   " " + str(self.age) + " years old.")
             return "Hello, I'm " + str(self.name) + " " + str(self.age) + " years old"
@@ -71,17 +70,17 @@ TEST_F(ValueTest, Object_NewObject) {
   const Local<Value> func = engine->eval(kPyClassScript);
   ASSERT_TRUE(func.isObject());
 
-  for (const std::initializer_list<Local<Object>> jenny_list{
+  for (const std::initializer_list<Local<Object>> jennyList{
            Object::newObject(func, {String::newString("Jenny"), Number::newNumber(5)}),
            // variadic helper
            Object::newObject(func, String::newString("Jenny"), Number::newNumber(5)),
            // C++ types
            Object::newObject(func, "Jenny", 5),
-            //mixed
-           Object::newObject(func, String::newString("Jenny"), 5)}; auto& jenny : jenny_list) {
-    auto name = script::Local<script::Object>::get(String::newString(u8"name"));
-    auto age = script::Local<script::Object>::get(String::newString(u8"age"));
-    auto greet = script::Local<script::Object>::get(String::newString(u8"greet"));
+           // mixed
+           Object::newObject(func, String::newString("Jenny"), 5)}; auto& jenny : jennyList) {
+    auto name = jenny.get(String::newString(u8"name"));
+    auto age = jenny.get(String::newString(u8"age"));
+    auto greet = jenny.get(String::newString(u8"greet"));
 
     ASSERT_TRUE(name.isString()) << name.describeUtf8();
     ASSERT_TRUE(age.isNumber()) << age.describeUtf8();

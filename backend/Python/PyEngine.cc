@@ -71,10 +71,8 @@ Local<Value> PyEngine::eval(const Local<String>& script, const Local<Value>& sou
     } else {
       Py_DECREF(run_return);
     }
-    PyObject* p_func1 = PyObject_GetAttrString(main, "f");
     PyObject* functions = PyModule_GetDict(main);
     PyObject* aa7 = PyList_GetItem(PyDict_Values(functions), PyDict_Size(functions) - 1);
-    auto tt =  PyErr_Occurred();
     //https://pythonextensionpatterns.readthedocs.io/en/latest/cpp_and_cpython.html
     if (!(PyErr_Occurred() == nullptr || !aa7)) {
       return Local<Value>{};
